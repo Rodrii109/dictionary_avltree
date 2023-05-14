@@ -1,7 +1,6 @@
 /*
 Coisas pra fazer: 
 ----------------
-	- criar as listas encadeadas das palavras
 	- criar as funções de inserção e remoção das listas encadeadas
 	- criar a função de impressão das listas encadeadas
 
@@ -84,6 +83,10 @@ struct nodeLinkedList *newNodeLinkedList(char word[100]){
 	return node;
 }
 
+void insertNodeLinkedList(struct nodeAVL *rootAVL, char word[100]){
+	struct nodeLinkedList *aux = rootAVL->LinkedListRoot;
+}	
+
 struct nodeAVL *newNode(char info, char word[100]){
 	struct nodeAVL *node = (struct nodeAVL *)malloc(sizeof(struct nodeAVL));
 
@@ -93,6 +96,8 @@ struct nodeAVL *newNode(char info, char word[100]){
 	node->LinkedListRoot = newNodeLinkedList(word);
 	node->height = 1;
 	node->bf = 0;
+
+	insertNodeLinkedList(node, word);
 
 	return (node);
 }
@@ -177,13 +182,26 @@ struct nodeAVL *deleteNode(struct nodeAVL *root, char info){
 	return root;
 }
 
-struct nodeAVL *searchNodeAVL(struct nodeAVL *root){
+struct nodeAVL *searchNodeAVL(struct nodeAVL *root, char key){
+	puts("entrou na funcao");
+	while(root != NULL){
+		puts("entrou no while");
+		if(root->info == key){
+			puts("ACHOU!");
+			break;
+		}else{
+			root = (root->info < key) ? root->right : root->left;
+			puts("trocou");
+		}
+	}
 
+	return root;
 }
 
-void insertNodeLinkedList(struct nodeAVL *rootAVL, char word[100]){
-
-}	
+struct nodeLinkedList *searchNodeLinkedList(struct nodeAVL *node, char word[100]){
+	struct nodeLinkedList *current = node->LinkedListRoot;
+	while(current != NULL)
+}
 
 void deleteNodeLinkedList(struct nodeLinkedList *root, char word[100]){
 
@@ -191,26 +209,34 @@ void deleteNodeLinkedList(struct nodeLinkedList *root, char word[100]){
 
 void scanWords(struct nodeAVL *root){
 	char word[100];
-	int n = -1;
+	int n = 0;
 	
+	fgets(word,100,stdin);
+
 	while(strncmp(word,"0", 1) != 0){
 		fgets(word,100,stdin);
 		
 		if(word[0] == '0')
 			break;
 
-		struct nodeAVL *aux = searchNodeAVL(root);
+		struct nodeAVL *aux = (struct nodeAVL *)malloc(sizeof(struct nodeAVL));
+		aux = searchNodeAVL(root,word[0]);
+
 		if(aux == NULL){
+			puts("aux nulo");
 			root = insertNode(root, word[0], word);
+			n++;
 		}else{
-			//procurar na lista o lugar onde armazenar a palavra
-			/*if(a palavra for encontrada na lista){
+			puts("aux nao nulo");
+			struct nodeLinkedList *aux2 = searchNodeLinkedList(aux, word);
+			/*if(){
 				não faz nada
 			}else{
 				adiciona a palavra na lista
 				n++;
-			}*/
+			}*/ 
 		}
+		free(aux);
 	}
 
 	if(n == 0)
@@ -246,7 +272,8 @@ void printMenu(){
 int main(){
 	int option;
 
-	struct nodeAVL *root = (struct nodeAVL *)malloc(sizeof(struct nodeAVL));
+	struct nodeAVL *root = NULL;
+
 	while(1){
 		printMenu();
 		scanf("%d", &option);
