@@ -83,10 +83,34 @@ struct nodeLinkedList *newNodeLinkedList(char word[100]){
 	return node;
 }
 
-void insertNodeLinkedList(struct nodeAVL *rootAVL, char word[100]){
-	struct nodeLinkedList *aux = rootAVL->LinkedListRoot;
-}	
+int insertNodeLinkedList(struct nodeAVL *rootAVL, char word[100]){
+	struct nodeLinkedList *node = newNodeLinkedList(word);
 
+	if(rootAVL->LinkedListRoot == NULL){
+		rootAVL->LinkedListRoot = node;
+	}else if((strcmp(word,rootAVL->LinkedListRoot->word) < 0) && (rootAVL->LinkedListRoot->next == NULL)){
+		node->next = rootAVL->LinkedListRoot;
+		rootAVL->LinkedListRoot = node;
+	}else{
+		while(rootAVL->LinkedListRoot->next != NULL){
+			if(strcmp(rootAVL->LinkedListRoot->next->word,word) < 0)
+				rootAVL->LinkedListRoot = rootAVL->LinkedListRoot->next;
+		}
+		if(rootAVL->LinkedListRoot->next != NULL){
+			if(strcmp(rootAVL->LinkedListRoot->next->word,word) > 0){
+				node->next = rootAVL->LinkedListRoot->next;
+				rootAVL->LinkedListRoot->next = node;
+			}else if(strcmp(rootAVL->LinkedListRoot->next->word,word) == 0){
+				return 0;
+			}
+		}else{
+			rootAVL->LinkedListRoot->next = node;
+			node->next = NULL;
+		}
+	}
+	return 1;
+}	
+	
 struct nodeAVL *newNode(char info, char word[100]){
 	struct nodeAVL *node = (struct nodeAVL *)malloc(sizeof(struct nodeAVL));
 
@@ -97,9 +121,7 @@ struct nodeAVL *newNode(char info, char word[100]){
 	node->height = 1;
 	node->bf = 0;
 
-	insertNodeLinkedList(node, word);
-
-	return (node);
+	return node;
 }
 
 struct nodeAVL *insertNode(struct nodeAVL *root, char info, char word[100]){
@@ -117,11 +139,11 @@ struct nodeAVL *insertNode(struct nodeAVL *root, char info, char word[100]){
 	root->bf = getBalanceFactor(root);
 
 	if(root->bf == 2){
-		if(root->right->bf == -1)
+		if((root->right != NULL) && (root->right->bf == -1))
 			root->left = LL(root->left);
 		return RR(root);
 	}else if(root->bf == -2){
-		if(root->left->bf == 1)
+		if((root->left != NULL) && (root->left->bf == 1))
 			root->right = RR(root->right);
 		return LL(root);
 	}
@@ -198,11 +220,6 @@ struct nodeAVL *searchNodeAVL(struct nodeAVL *root, char key){
 	return root;
 }
 
-struct nodeLinkedList *searchNodeLinkedList(struct nodeAVL *node, char word[100]){
-	struct nodeLinkedList *current = node->LinkedListRoot;
-	while(current != NULL)
-}
-
 void deleteNodeLinkedList(struct nodeLinkedList *root, char word[100]){
 
 }
@@ -213,30 +230,24 @@ void scanWords(struct nodeAVL *root){
 	
 	fgets(word,100,stdin);
 
-	while(strncmp(word,"0", 1) != 0){
+	while(1){
 		fgets(word,100,stdin);
 		
 		if(word[0] == '0')
 			break;
+		else{
+			struct nodeAVL *aux = (struct nodeAVL *)malloc(sizeof(struct nodeAVL));
+			aux = searchNodeAVL(root,word[0]);
 
-		struct nodeAVL *aux = (struct nodeAVL *)malloc(sizeof(struct nodeAVL));
-		aux = searchNodeAVL(root,word[0]);
-
-		if(aux == NULL){
-			puts("aux nulo");
-			root = insertNode(root, word[0], word);
-			n++;
-		}else{
-			puts("aux nao nulo");
-			struct nodeLinkedList *aux2 = searchNodeLinkedList(aux, word);
-			/*if(){
-				não faz nada
-			}else{
-				adiciona a palavra na lista
+			if(aux == NULL){
+				root = insertNode(root, word[0], word);
 				n++;
-			}*/ 
+			}else{
+				int i = insertNodeLinkedList(root, word);
+				if(i)
+					n++;
+			}
 		}
-		free(aux);
 	}
 
 	if(n == 0)
